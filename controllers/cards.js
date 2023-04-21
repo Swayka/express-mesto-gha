@@ -29,7 +29,7 @@ const deleteCard = (req, res) => {
   Card.findByIdAndRemove(cardId)
     .orFail()
     .then((card) => {
-      res.send(cards);
+      res.send(card);
     })
     .catch((error) => {
       if (error.name === 'CastError') {
@@ -53,8 +53,14 @@ const putLike = (req, res) => {
       .then((like) => {
         res.send(like);
       })
-      .catch(() => {
-        res.status(500).send({ message: 'Произошла ошибка' });
+      .catch((error) => {
+        if (error.name === 'CastError') {
+          res.status(400).send({ message: 'Некорректные данные' });
+        } else if (error.name === 'DocumentNotFoundError') {
+          res.status(404).send({ message: 'Карточка не найдена' });
+        } else {
+          res.status(500).send({ message: 'Произошла ошибка' });
+        }
       });
   };
 
@@ -71,7 +77,9 @@ const putLike = (req, res) => {
       })
       .catch((error) => {
         if (error.name === 'CastError') {
-          res.status(400).send({ message: 'Карточка не найдена' });
+          res.status(400).send({ message: 'Некорректные данные' });
+        } else if (error.name === 'DocumentNotFoundError') {
+          res.status(404).send({ message: 'Карточка не найдена' });
         } else {
           res.status(500).send({ message: 'Произошла ошибка' });
         }
