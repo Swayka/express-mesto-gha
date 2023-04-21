@@ -103,11 +103,11 @@ const updateCard = (req, res, updateData) => {
       } else { res.status(404).send({ message: 'Карточка с указанным id не найдена' }); }
     })
     .catch((error) => {
-      //if (error.name === 'DocumentNotFoundError') {
-      //  res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
-      //  return;
-      //}
-      if (error instanceof mongoose.Error.CastError) {
+      if (error.name === 'DocumentNotFoundError') {
+        res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
+        return;
+      }
+      if (error.name === 'CastError') {
         res.status(ERROR_BAD_DATA).send({ message: 'Неверный формат id карточки' });
         return;
       }
