@@ -72,14 +72,15 @@ const putLike = (req, res) => {
       { new: true },
     )
       .orFail()
-      .then((like) => {
-        res.status(200).send(like);
+      .then((card) => {
+        if (!card) {
+          return res.status(404).send({ message: 'Карточка не найдена'});
+        }
+        return res.send(card);
       })
       .catch((error) => {
-        if (error.name === 'ValidationError') {
+        if (error.name === 'CastError') {
           res.status(400).send({ message: 'Некорректные данные' });
-        } else if (error.name === 'DocumentNotFoundError') {
-          res.status(404).send({ message: 'Карточка не найдена' });
         } else {
           res.status(500).send({ message: 'Произошла ошибка' });
         }
