@@ -15,10 +15,15 @@ const createCard = (req, res) => {
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((card) => {
-      res.status(COMPLETED).send({ data: card });
+      card.populate('owner')
+        .then((newCard) => res.status(COMPLETED).send(newCard))
+        .catch(() => res.status(ERROR_DEFAULT).send({ message: 'Произошла ошибка' }));
     })
+    //.then((card) => {
+    //  res.status(COMPLETED).send({ data: card });
+    //})
     .catch((error) => {
-      if (error.name === 'ValidationError') {
+      if (error instanceof mongoose.Error.ValidationError) {
         res.status(ERROR_BAD_DATA).send({ message: 'Переданы некорректные данные при создании карточки' });
       } else {
         res.status(ERROR_DEFAULT).send({ message: 'Произошла ошибка' });
@@ -28,68 +33,26 @@ const createCard = (req, res) => {
 
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
-  Card.findByIdAndRemove(cardId)
+  const owner = req.user._id;
+  Card.findByIdAndRemove({owner, cardId})
     .orFail()
     .then((card) => {
-      res.send({ data: card });
+      if (card) {
+        res.send({ message: 'Карточка удалена'});
+      } else {
+        res.status(ERROR_NOT_FOUND).send({ message: 'Карточка не найдена' });
+      }
+
     })
     .catch((error) => {
-      if (error.name === 'CastError') {
+      if (error instanceof mongoose.Error.CastError) {
         res.status(ERROR_BAD_DATA).send({ message: 'Некорректные данные' });
-      } else if (error.name === 'DocumentNotFoundError') {
-        res.status(ERROR_NOT_FOUND).send({ message: 'Карточка не найдена' });
       } else {
         res.status(ERROR_DEFAULT).send({ message: 'Произошла ошибка' });
       }
     });
 };
 
-//function putLike(req, res) {
-//  Card.findByIdAndUpdate(
-//    req.params.cardId,
-//    {$addToSet: { likes: req.user._id }},
-//    {new: true},
-//  )
-//    .then((card) => {
-//      if (!card) {
-//        res.status(404).send({ message: 'Передан несуществующий _id карточки.' });
-//        return;
-//      }
-//      return res.send({ data: card });
-//    })
-//    .catch((err) => {
-//      if (err.name === 'CastError') {
-//        res.status(400).send({ message: 'Передан невалидный id' });
-//        return;
-//      }
-//        res.status(500).send({ message: 'Произошла ошибка' });
-//
-//    });
-//}
-//
-//function deleteLike(req, res) {
-//  Card.findByIdAndUpdate(
-//    req.params.cardId,
-//    {$pull: { likes: req.user._id }},
-//    {new: true },
-//  )
-//    .then((card) => {
-//      if (card) {
-//        res.status(200).send(card);
-//      } else { res.status(404).send({ message: 'Карточка с указанным id не найдена' }); }
-//    })
-//    .catch((error) => {
-//      if (error.name === 'DocumentNotFoundError') {
-//        res.status(404).send({ message: 'Карточка с указанным id не найдена' });
-//        return;
-//      }
-//      if (error.name === 'CastError') {
-//        res.status(400).send({ message: 'Неверный формат id карточки' });
-//        return;
-//      }
-//      res.status(500).send({ message: 'Ошибка на сервере' });
-//    });
-//}
 const updateCard = (req, res, updateData) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
@@ -100,18 +63,18 @@ const updateCard = (req, res, updateData) => {
     .then((card) => {
       if (card) {
         res.status(SUCCESS).send(card);
-      } else { res.status(404).send({ message: 'Карточка с указанным id не найдена' }); }
+      } else { res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' }); }
     })
     .catch((error) => {
-      if (error.name === 'DocumentNotFoundError') {
-        res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
-        return;
-      }
-      if (error.name === 'CastError') {
+      //if (error.name === 'DocumentNotFoundError') {
+      //  res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
+      //  return;
+      //}
+      if (error instanceof mongoose.Error.CastError) {
         res.status(ERROR_BAD_DATA).send({ message: 'Неверный формат id карточки' });
-        return;
+      } else {
+        res.status(ERROR_DEFAULT).send({ message: 'Ошибка на сервере' });
       }
-      res.status(ERROR_DEFAULT).send({ message: 'Ошибка на сервере' });
     });
 }
 
