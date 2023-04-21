@@ -42,27 +42,27 @@ const deleteCard = (req, res) => {
     });
 };
 
-//const putLike = (req, res) => {
-//    const { cardId } = req.params;
-//    Card.findByIdAndUpdate(
-//      cardId,
-//      { $addToSet: { likes: req.user._id } },
-//      { new: true },
-//    )
-//      .orFail()
-//      .then((like) => {
-//        res.send(like);
-//      })
-//      .catch((error) => {
-//        if (error.name === 'ValidationError') {
-//          res.status(400).send({ message: 'Некорректные данные' });
-//        } else if (error.name === 'DocumentNotFoundError') {
-//          res.status(404).send({ message: 'Карточка не найдена' });
-//        } else {
-//          res.status(500).send({ message: 'Произошла ошибка' });
-//        }
-//      });
-//  };
+const putLike = (req, res) => {
+    const { cardId } = req.params;
+    Card.findByIdAndUpdate(
+      cardId,
+      { $addToSet: { likes: req.user._id } },
+      { new: true },
+    )
+      .orFail()
+      .then((like) => {
+        res.send(like);
+      })
+      .catch((error) => {
+        if (error.name === 'ValidationError') {
+          res.status(400).send({ message: 'Некорректные данные' });
+        } else if (error.name === 'DocumentNotFoundError') {
+          res.status(404).send({ message: 'Карточка не найдена' });
+        } else {
+          res.status(500).send({ message: 'Произошла ошибка' });
+        }
+      });
+  };
 //
 //  const deleteLike = (req, res) => {
 //    const { cardId } = req.params;
@@ -104,11 +104,11 @@ const cardDataUpdate = (req, res, updateData) => {
     });
 };
 
-const putLike = (req, res) => {
-  const updateData = { $addToSet: { likes: req.user._id } }; // добавить _id в массив
-  cardDataUpdate(req, res, updateData);
-};
-
+//const putLike = (req, res) => {
+//  const updateData = { $addToSet: { likes: req.user._id } }; // добавить _id в массив
+//  cardDataUpdate(req, res, updateData);
+//};
+//
 const deleteLike = (req, res) => {
   const updateData = { $pull: { likes: req.user._id } }; // убрать _id из массива
   cardDataUpdate(req, res, updateData);
