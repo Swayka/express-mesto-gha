@@ -29,7 +29,7 @@ const deleteCard = (req, res) => {
   Card.findByIdAndRemove(cardId)
     .orFail()
     .then((card) => {
-      res.send(card);
+      res.send({ data: card });
     })
     .catch((error) => {
       if (error.name === 'CastError') {
@@ -73,10 +73,11 @@ const putLike = (req, res) => {
     )
       .orFail()
       .then((card) => {
-        if (!card) {
-          return res.status(404).send({ message: 'Карточка не найдена'});
+        if (card) {
+          res.send({ data: card });
+        } else {
+          res.status(404).send({ message: 'Карточка не найдена'});
         }
-        return res.send(card);
       })
       .catch((error) => {
         if (error.name === 'CastError') {
