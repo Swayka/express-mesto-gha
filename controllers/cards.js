@@ -15,15 +15,10 @@ const createCard = (req, res) => {
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((card) => {
-      card.populate('owner')
-        .then((newCard) => res.status(COMPLETED).send(newCard))
-        .catch(() => res.status(ERROR_DEFAULT).send({ message: 'Произошла ошибка' }));
+      res.status(COMPLETED).send({ data: card });
     })
-    //.then((card) => {
-    //  res.status(COMPLETED).send({ data: card });
-    //})
     .catch((error) => {
-      if (error instanceof mongoose.Error.ValidationError) {
+      if (error.name === 'ValidationError') {
         res.status(ERROR_BAD_DATA).send({ message: 'Переданы некорректные данные при создании карточки' });
       } else {
         res.status(ERROR_DEFAULT).send({ message: 'Произошла ошибка' });
@@ -33,20 +28,16 @@ const createCard = (req, res) => {
 
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
-  const owner = req.user._id;
-  Card.findByIdAndRemove({owner, cardId})
+  Card.findByIdAndRemove(cardId)
     .orFail()
     .then((card) => {
-      if (card) {
-        res.send({ message: 'Карточка удалена'});
-      } else {
-        res.status(ERROR_NOT_FOUND).send({ message: 'Карточка не найдена' });
-      }
-
+      res.send({ data: card });
     })
     .catch((error) => {
-      if (error instanceof mongoose.Error.CastError) {
+      if (error.name === 'CastError') {
         res.status(ERROR_BAD_DATA).send({ message: 'Некорректные данные' });
+      } else if (error.name === 'DocumentNotFoundError') {
+        res.status(ERROR_NOT_FOUND).send({ message: 'Карточка не найдена' });
       } else {
         res.status(ERROR_DEFAULT).send({ message: 'Произошла ошибка' });
       }
@@ -66,15 +57,15 @@ const updateCard = (req, res, updateData) => {
       } else { res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' }); }
     })
     .catch((error) => {
-      //if (error.name === 'DocumentNotFoundError') {
-      //  res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
-      //  return;
-      //}
-      if (error instanceof mongoose.Error.CastError) {
-        res.status(ERROR_BAD_DATA).send({ message: 'Неверный формат id карточки' });
-      } else {
-        res.status(ERROR_DEFAULT).send({ message: 'Ошибка на сервере' });
+      if (error.name === 'DocumentNotFoundError') {
+        res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
+        return;
       }
+      if (error.name === 'CastError') {
+        res.status(ERROR_BAD_DATA).send({ message: 'Неверный формат id карточки' });
+        return;
+      }
+      res.status(ERROR_DEFAULT).send({ message: 'Ошибка на сервере' });
     });
 }
 
