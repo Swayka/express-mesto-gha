@@ -54,7 +54,7 @@ const putLike = (req, res) => {
         res.send(like);
       })
       .catch((error) => {
-        if (error.name === 'CastError') {
+        if (error.name === 'ValidationError') {
           res.status(400).send({ message: 'Некорректные данные' });
         } else if (error.name === 'DocumentNotFoundError') {
           res.status(404).send({ message: 'Карточка не найдена' });
@@ -73,7 +73,7 @@ const putLike = (req, res) => {
     )
       .orFail()
       .then((like) => {
-        res.send(like);
+        res.status(200).send(like);
       })
       .catch((error) => {
         if (error.name === 'ValidationError') {
