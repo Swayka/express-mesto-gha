@@ -1,12 +1,13 @@
 const User = require('../models/user');
+const { SUCCESS, COMPLETED, ERROR_BAD_DATA, ERROR_NOT_FOUND, ERROR_DEFAULT } = require('../utils/errors');
 
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => {
-      res.send(users);
+      res.status(SUCCESS).send(users);
     })
     .catch(() => {
-      res.status(500).send({ message: 'Произошла ошибка' });
+      res.status(ERROR_DEFAULT).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -19,11 +20,11 @@ const getUserById = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректные данные' });
+        res.status(ERROR_BAD_DATA).send({ message: 'Некорректные данные' });
       } else if (err.name === "DocumentNotFoundError") {
-        res.status(404).send({message: 'Пользователь по указанному _id не найден'})
+        res.status(ERROR_NOT_FOUND).send({message: 'Пользователь по указанному _id не найден'})
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(ERROR_DEFAULT).send({ message: 'Произошла ошибка' });
       }
     });
 };
@@ -32,14 +33,14 @@ const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((user) => {
-      res.status(201).send(user);
+      res.status(COMPLETED).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        res.status(ERROR_BAD_DATA).send({ message: 'Переданы некорректные данные при создании пользователя' });
         //return;
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(ERROR_DEFAULT).send({ message: 'Произошла ошибка' });
       }
     });
 };
@@ -50,9 +51,9 @@ const userUpdate = (req, res, updateData) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: ' Переданы некорректные данные при обновлении профиля' });
+        res.status(ERROR_BAD_DATA).send({ message: ' Переданы некорректные данные при обновлении профиля' });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(ERROR_DEFAULT).send({ message: 'Произошла ошибка' });
       }
     });
 };
