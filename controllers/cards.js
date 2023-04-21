@@ -3,7 +3,7 @@ const { SUCCESS, COMPLETED, ERROR_BAD_DATA, ERROR_NOT_FOUND, ERROR_DEFAULT } = r
 
 const getCards = (req, res) => {
   Card.find({})
-    .populate['owner', 'likes']
+    .populate(['owner', 'likes'])
     .then((cards) => res.send({ data: cards }))
     .catch(() => {
       res.status(ERROR_DEFAULT).send({ message: 'Произошла ошибка' });
@@ -96,7 +96,7 @@ const updateCard = (req, res, updateData) => {
     updateData,
     {new: true },
   )
-    .populate['owner', 'likes']
+    .populate(['owner', 'likes'])
     .then((card) => {
       if (card) {
         res.status(SUCCESS).send(card);
