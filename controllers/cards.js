@@ -133,18 +133,18 @@ function putLike(req, res) {
   )
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Пользователь по указанному _id не найден.');
+        res.status(404).send({ message: 'Передан несуществующий _id карточки.' });// не существ. id
+        return;
       }
-      return res.send(card);
+      return res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Передан невалидный id' });
-      } else if (err.statusCode === 404) {
-        res.status(404).send({ message: err.message });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        return;
       }
+        res.status(500).send({ message: 'Произошла ошибка' });
+
     });
 }
 
@@ -160,22 +160,18 @@ function deleteLike(req, res) {
   )
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Пользователь по указанному _id не найден.');
+        res.status(400).send({ message: 'Передан невалидный id' });
+        return;
       }
-      return res.send(card);
+      return res.send({ data: card });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res
-          .status(400)
-          .send({ message: 'Переданы некорректные данные при снятии лайка' });
-      } else if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Передан невалидный id' });
-      } else if (err.statusCode === 404) {
-        res.status(404).send({ message: err.message });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные при снятии лайка'});
+        return;
       }
+        res.status(500).send({ message: 'Произошла ошибка' });
+
     });
 }
 module.exports = {
