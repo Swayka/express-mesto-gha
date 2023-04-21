@@ -88,33 +88,87 @@ const deleteCard = (req, res) => {
 //      });
 //  };
 //
-const cardDataUpdate = (req, res, updateData) => {
-  Card.findByIdAndUpdate(req.params.cardId, updateData, { new: true })
-    .populate(['owner', 'likes'])
+//const cardDataUpdate = (req, res, updateData) => {
+//  Card.findByIdAndUpdate(req.params.cardId, updateData, { new: true })
+//    .populate(['owner', 'likes'])
+//    .then((card) => {
+//      if (card) res.send({ data: card });
+//      else res.status(404).send({ message: 'Карточка не найдена' });
+//    })
+//    .catch((err) => {
+//      if (err instanceof mongoose.Error.CastError) {
+//        res.status(400).send({ message: 'Переданы некорректные данные карточки.' });
+//      } else {
+//        res.status(500).send({ message: 'Произошла ошибка' });
+//      }
+//    });
+//};
+
+//const putLike = (req, res) => {
+//  const updateData = { $addToSet: { likes: req.user._id } }; // добавить _id в массив
+//  cardDataUpdate(req, res, updateData);
+//};
+//
+//const deleteLike = (req, res) => {
+//  const updateData = { $pull: { likes: req.user._id } }; // убрать _id из массива
+//  cardDataUpdate(req, res, updateData);
+//};
+
+function putLike(req, res) {
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    {
+      $addToSet: { likes: req.user._id },
+    },
+    {
+      new: true,
+    },
+  )
     .then((card) => {
-      if (card) res.send({ data: card });
-      else res.status(404).send({ message: 'Карточка не найдена' });
+      if (card) return res.status(200).send(card);
+
+      //throw new NotFoundError('Объект не найден');
     })
     .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        res.status(400).send({ message: 'Переданы некорректные данные карточки.' });
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Передан невалидный id' });
+      } else if (err.statusCode === 404) {
+        res.status(404).send({ message: err.message });
       } else {
         res.status(500).send({ message: 'Произошла ошибка' });
       }
     });
-};
+}
 
-const putLike = (req, res) => {
-  const updateData = { $addToSet: { likes: req.user._id } }; // добавить _id в массив
-  cardDataUpdate(req, res, updateData);
-};
+function deleteLike(req, res) {
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    {
+      $pull: { likes: req.user._id },
+    },
+    {
+      new: true,
+    },
+  )
+    .then((card) => {
+      if (card) return res.status(200).send(card);
 
-const deleteLike = (req, res) => {
-  const updateData = { $pull: { likes: req.user._id } }; // убрать _id из массива
-  cardDataUpdate(req, res, updateData);
-};
-
-
+      //throw new NotFoundError('Объект не найден');
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res
+          .status(400)
+          .send({ message: 'Переданы некорректные данные при снятии лайка' });
+      } else if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Передан невалидный id' });
+      } else if (err.statusCode === 404) {
+        res.status(404).send({ message: err.message });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
+      }
+    });
+}
 module.exports = {
   getCards,
   createCard,
