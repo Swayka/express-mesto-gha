@@ -37,7 +37,7 @@ const createUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'Error') {
-        res.status(404).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
         return;
       }
       res.status(500).send({ message: 'Произошла ошибка' });
