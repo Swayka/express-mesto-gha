@@ -13,19 +13,18 @@ const getUsers = (req, res) => {
 const getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
+    .orFail()
     .then((user) => {
-      if (!user) {
-        res.status(404).send({ message: 'Пользователь по указанному _id не найден' });
-        return;
-      }
-      res.send(user);
+      res.send(user)
     })
     .catch((err) => {
-      if (err.name === 'Error') {
-        res.status(404).send({ message: 'Пользователь по указанному _id не найден' });
-        return;
+      if (err.name === 'SomeError') {
+        res.status(400).send({ message: 'Некорректные данные' });
+      } else if (err.name === "DocumentNotFoundError") {
+        res.status(404).send({message: 'Пользователь по указанному _id не найден'})
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
       }
-      res.status(500).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -36,11 +35,12 @@ const createUser = (req, res) => {
       res.status(201).send(user);
     })
     .catch((err) => {
-      if (err.name === 'Error') {
+      if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
-        return;
+        //return;
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
       }
-      res.status(500).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -49,11 +49,11 @@ const userUpdate = (req, res, updateData) => {
   User.findByIdAndUpdate(userId, updateData, { new: true, runValidators: true })
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'Error') {
-        res.status(404).send({ message: ' Переданы некорректные данные при обновлении профиля' });
-        return;
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: ' Переданы некорректные данные при обновлении профиля' });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
       }
-      res.status(500).send({ message: 'Произошла ошибка' });
     });
 };
 
