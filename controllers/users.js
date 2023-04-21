@@ -12,15 +12,17 @@ const getUsers = (req, res) => {
 
 const getUserById = (req, res) => {
   const { userId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    res.status(400).send({ message: 'Некорректный идентификатор пользователя' });
+    return;
+  }
   User.findById(userId)
     .orFail()
     .then((user) => {
       res.send(user)
     })
     .catch((err) => {
-      if (err.name === 'SomeError') {
-        res.status(400).send({ message: 'Некорректные данные' });
-      } else if (err.name === "DocumentNotFoundError") {
+      if (err.name === "DocumentNotFoundError") {
         res.status(404).send({message: 'Пользователь по указанному _id не найден'})
       } else {
         res.status(500).send({ message: 'Произошла ошибка' });
