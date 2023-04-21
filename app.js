@@ -20,10 +20,10 @@ app.use((req, res, next) => {
 app.use(userRouter);
 app.use(cardRouter);
 
-//app.use('*', (req, res) => {
-//  res.status(404).send({message: 'Что-то пошло не так'});
-//});
-//
+app.use('*', (req, res) => {
+  res.status(404).send({message: 'Что-то пошло не так'});
+});
+
 app.listen(PORT, () => {
   console.log("Server started on port " + PORT);
 });
