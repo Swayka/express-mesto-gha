@@ -17,7 +17,7 @@ const createCard = (req, res) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании карточки' });
+        res.status(404).send({ message: 'Переданы некорректные данные при создании карточки' });
         return;
       }
       res.status(500).send({ message: 'Произошла ошибка' });
@@ -38,7 +38,7 @@ const deleteCard = (req, res) => {
         return;
       }
       if (error.name === 'CastError') {
-        res.status(400).send({ message: 'Неверный формат id карточки' });
+        res.status(404).send({ message: 'Неверный формат id карточки' });
         return;
       }
       res.status(500).send({ message: 'Произошла ошибка' });
@@ -63,7 +63,7 @@ const putLike = (req, res) => {
           return;
         }
         if (error.name === 'CastError') {
-          res.status(400).send({ message: 'Неверный формат id карточки' });
+          res.status(404).send({ message: 'Неверный формат id карточки' });
           return;
         }
         res.status(500).send({ message: 'Произошла ошибка' });
@@ -88,7 +88,7 @@ const putLike = (req, res) => {
           return;
         }
         if (error.name === 'CastError') {
-          res.status(400).send({ message: 'Неверный формат id карточки' });
+          res.status(404).send({ message: 'Неверный формат id карточки' });
           return;
         }
         res.status(500).send({ message: 'Произошла ошибка' });
