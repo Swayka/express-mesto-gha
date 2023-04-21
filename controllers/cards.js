@@ -114,6 +114,13 @@ const deleteCard = (req, res) => {
 //  cardDataUpdate(req, res, updateData);
 //};
 
+//const validateCard = (res, card) => {
+//  if (!card) {
+//    throw new NotFoundError('Пользователь по указанному _id не найден.');
+//  }
+//  return res.send(card);
+//};
+
 function putLike(req, res) {
   Card.findByIdAndUpdate(
     req.params.cardId,
@@ -125,9 +132,10 @@ function putLike(req, res) {
     },
   )
     .then((card) => {
-      if (card) return res.status(200).send(card);
-
-      //throw new NotFoundError('Объект не найден');
+      if (!card) {
+        throw new NotFoundError('Пользователь по указанному _id не найден.');
+      }
+      return res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -151,9 +159,10 @@ function deleteLike(req, res) {
     },
   )
     .then((card) => {
-      if (card) return res.status(200).send(card);
-
-      //throw new NotFoundError('Объект не найден');
+      if (!card) {
+        throw new NotFoundError('Пользователь по указанному _id не найден.');
+      }
+      return res.send(card);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
