@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
-const { errors } = require('celebrate');
 const rootRouter = require('./routes/index');
 const { login, createUser } = require('./controllers/users');
 const { loginValidation, userValidation } = require('./middlewares/validate');
@@ -23,15 +22,12 @@ app.post('/signin', loginValidation, login);
 app.post('/signup', userValidation, createUser);
 app.use('/', rootRouter);
 
-app.use(errors());
-
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   const { statusCode = 500, message } = err;
 
   res.status(statusCode).send({
     message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
   });
-  next();
 });
 
 app.listen(PORT, () => {
