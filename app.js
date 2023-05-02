@@ -15,7 +15,9 @@ app.use(helmet());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
+mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
+  useNewUrlParser: true,
+});
 
 app.post('/signin', loginValidation, login);
 app.post('/signup', userValidation, createUser);

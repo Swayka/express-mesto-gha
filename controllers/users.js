@@ -5,8 +5,7 @@ const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
 const ConflictRequestError = require('../errors/ConflictRequestError');
 const BadRequestError = require('../errors/BadRequestError');
-
-const { JWT_SECRET, NODE_ENV } = process.env;
+const AuthorizationError = require('../errors/AuthorizationError');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -35,7 +34,7 @@ const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  bcrypt.hash(password, 10)
+  return bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
@@ -60,10 +59,10 @@ const userUpdate = (req, res, updateData, next) => {
   const userId = req.user._id;
   User.findByIdAndUpdate(userId, updateData, { new: true, runValidators: true })
     .then((user) => {
-      if (user) res.send({ data: user });
-      else {
-        throw new NotFoundError('Пользователь не найден');
+      if (!user) {
+        throw new NotFoundError({ message: 'Пользователь не найден' });
       }
+      res.send({ data: user });
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
@@ -88,17 +87,35 @@ const updateUserAvatar = (req, res) => {
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
-  return User.findUserByCredentials(email, password)
+  let userId;
+
+  User.findOne({ email }).select('+password')
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
+      if (!user) {
+        throw new AuthorizationError('Неправильные почта или пароль.');
+      }
+
+      userId = user._id;
+
+      return bcrypt.compare(password, user.password);
+    })
+    .then((matched) => {
+      if (!matched) {
+        throw new AuthorizationError('Неправильные почта или пароль.');
+      }
+
+      const token = jwt.sign({ _id: userId }, 'some-secret-key', { expiresIn: '7d' });
+
       res.cookie('jwt', token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
-        sameSite: true,
       });
-      res.status(200).send({ message: 'Успешный вход' });
+
+      return res.send({ message: 'Всё верно!' });
     })
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
 
 const getUser = (req, res, next) => {
