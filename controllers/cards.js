@@ -67,14 +67,14 @@ const updateCard = (req, res, updateData, next) => {
     });
 };
 
-const putLike = (req, res) => {
+const putLike = (req, res, next) => {
   const updateData = { $addToSet: { likes: req.user._id } };
-  updateCard(req, res, updateData);
+  updateCard(req, res, updateData, next);
 };
 
-const deleteLike = (req, res) => {
+const deleteLike = (req, res, next) => {
   const updateData = { $pull: { likes: req.user._id } };
-  updateCard(req, res, updateData);
+  updateCard(req, res, updateData, next);
 };
 
 module.exports = {

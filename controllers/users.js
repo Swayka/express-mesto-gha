@@ -76,13 +76,13 @@ const userUpdate = (req, res, updateData, next) => {
 };
 
 const updateUserInfo = (req, res) => {
-  const updateData = req.body;
-  userUpdate(req, res, updateData);
+  const { name, about } = req.body;
+  userUpdate(req, res, { name, about });
 };
 
 const updateUserAvatar = (req, res) => {
-  const updateData = req.body;
-  userUpdate(req, res, updateData);
+  const { avatar } = req.body;
+  userUpdate(req, res, { avatar });
 };
 
 const login = (req, res, next) => {
