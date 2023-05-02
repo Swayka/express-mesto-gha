@@ -1,14 +1,5 @@
-const { celebrate, Joi, CelebrateError } = require('celebrate');
-const validator = require('validator');
+const { celebrate, Joi } = require('celebrate');
 const { LINK } = require('../utils/regex');
-
-const validate = (value) => {
-  const result = validator.isURL(value);
-  if (result) {
-    return value;
-  }
-  throw new CelebrateError('Некорректный адрес');
-};
 
 const loginValidation = celebrate({
   body: Joi.object().keys({
