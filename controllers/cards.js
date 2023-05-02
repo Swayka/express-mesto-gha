@@ -18,7 +18,7 @@ const createCard = (req, res, next) => {
     .then((card) => {
       res.send({ data: card });
     })
-    .catch((error) => {
+    .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
         next(new BadRequestError('Переданы некорректные данные'));
       } else next(err);
@@ -50,7 +50,7 @@ const updateCard = (req, res, updateData) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     updateData,
-    {new: true },
+    { new: true },
   )
     .populate(['owner', 'likes'])
     .then((card) => {
@@ -58,12 +58,12 @@ const updateCard = (req, res, updateData) => {
         throw new NotFoundError('Карточка не найдена');
       } else res.send({ data: card });
     })
-    .catch((error) => {
+    .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        next(new BadRequestError('Переданы не корректные данные'));
-      } else next(err);
+        throw new BadRequestError('Переданы не корректные данные');
+      }
     });
-}
+};
 
 const putLike = (req, res) => {
   const updateData = { $addToSet: { likes: req.user._id } };
@@ -80,5 +80,5 @@ module.exports = {
   createCard,
   deleteCard,
   putLike,
-  deleteLike
-}
+  deleteLike,
+};

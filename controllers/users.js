@@ -1,7 +1,7 @@
-const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
 const ConflictRequestError = require('../errors/ConflictRequestError');
 const BadRequestError = require('../errors/BadRequestError');
@@ -9,8 +9,8 @@ const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const getUsers = (req, res, next) => {
   User.find({})
-  .then((users) => res.send({ data: users }))
-  .catch(next);
+    .then((users) => res.send({ data: users }))
+    .catch(next);
 };
 
 const getUserById = (req, res, next) => {
@@ -31,9 +31,13 @@ const getUserById = (req, res, next) => {
 };
 
 const createUser = (req, res, next) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
   return bcrypt.hash(password, 10)
-    .then((hash) => User.create({ name, about, avatar, password: hash }))
+    .then((hash) => User.create({
+      name, about, avatar, email, password: hash,
+    }))
     .then((user) => {
       res.send({
         data: {
@@ -41,7 +45,7 @@ const createUser = (req, res, next) => {
           about: user.about,
           avatar: user.avatar,
           email: user.email,
-        }
+        },
       });
     })
     .catch((err) => {
@@ -59,8 +63,8 @@ const userUpdate = (req, res, updateData) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new BadRequestError('Переданы некорректные данные'));
-      } else next(err);
+        throw new BadRequestError('Переданы некорректные данные');
+      }
     });
 };
 
@@ -78,7 +82,7 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
   let userId;
 
-  User.findOne({email}).select('+password')
+  User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
         throw new UnauthorizedError('Неправильные почта или пароль.');
@@ -87,7 +91,7 @@ const login = (req, res, next) => {
       return bcrypt.compare(password, user.password);
     })
     .then((matched) => {
-      if(!matched) {
+      if (!matched) {
         throw new UnauthorizedError('Неправильные почта или пароль.');
       }
       const token = jwt.sign({ _id: userId }, 'some-secret-key', { expiresIn: '7d' });
@@ -97,14 +101,12 @@ const login = (req, res, next) => {
         httpOnly: true,
       });
 
-      return res.send({message: 'Все верно!'});
+      return res.send({ message: 'Все верно!' });
     })
-    .catch((error) => {
+    .catch((err) => {
       next(err);
     });
 };
-
-
 
 const getUser = (req, res, next) => {
   User.findById(req.user._id)
@@ -121,7 +123,6 @@ const getUser = (req, res, next) => {
     });
 };
 
-
 module.exports = {
   getUsers,
   getUserById,
@@ -129,5 +130,5 @@ module.exports = {
   updateUserInfo,
   updateUserAvatar,
   login,
-  getUser
+  getUser,
 };

@@ -3,7 +3,9 @@ const { aboutValidation, avatarValidation, idValidation } = require('../middlewa
 
 const userRouter = express.Router();
 
-const { getUsers, getUserById, updateUserInfo, updateUserAvatar, getUser } = require('../controllers/users');
+const {
+  getUsers, getUserById, updateUserInfo, updateUserAvatar, getUser,
+} = require('../controllers/users');
 
 userRouter.get('/', getUsers);
 userRouter.get('/me', idValidation, getUser);

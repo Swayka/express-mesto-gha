@@ -6,13 +6,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     minlength: 2,
     maxlength: 30,
-    default: 'Жак-Ив Кусто'
+    default: 'Жак-Ив Кусто',
   },
   about: {
     type: String,
     minlength: 2,
     maxlength: 30,
-    default: 'Исследователь'
+    default: 'Исследователь',
   },
   avatar: {
     type: String,
@@ -32,15 +32,15 @@ const userSchema = new mongoose.Schema({
       validator(email) {
         return isEmail(email);
       },
-      message: 'Некорректный адрес электронной почты'
-    }
+      message: 'Некорректный адрес электронной почты',
+    },
   },
   password: {
     type: String,
     required: true,
     minlength: 8,
-    select: false
-  }
+    select: false,
+  },
 });
 
 module.exports = mongoose.model('user', userSchema);
