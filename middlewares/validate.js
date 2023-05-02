@@ -1,5 +1,6 @@
 const { celebrate, Joi, CelebrateError } = require('celebrate');
 const validator = require('validator');
+const { LINK } = require('../utils/regex');
 
 const validate = (value) => {
   const result = validator.isURL(value);
@@ -20,7 +21,7 @@ const userValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().custom(validate),
+    avatar: Joi.string().regex(LINK),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
@@ -41,7 +42,7 @@ const cardIdValidation = celebrate({
 const cardValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().custom(validate),
+    link: Joi.string().required().regex(LINK),
   }),
 });
 
@@ -54,7 +55,7 @@ const aboutValidation = celebrate({
 
 const avatarValidation = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required().custom(validate),
+    avatar: Joi.string().required().regex(LINK),
   }),
 });
 
