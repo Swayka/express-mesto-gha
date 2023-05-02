@@ -107,7 +107,7 @@ const login = (req, res, next) => {
         httpOnly: true,
       });
 
-      return res.send({ message: 'Все верно!' });
+      return res.status(200).send({ message: 'Все верно!' });
     })
     .catch((err) => {
       next(err);
