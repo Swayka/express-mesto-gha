@@ -6,6 +6,7 @@ const NotFoundError = require('../errors/NotFoundError');
 const ConflictRequestError = require('../errors/ConflictRequestError');
 const BadRequestError = require('../errors/BadRequestError');
 const AuthorizationError = require('../errors/AuthorizationError');
+const COMPLETED = require ('../utils/errors')
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -38,7 +39,7 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.send({
+    .then((user) => res.status(COMPLETED).send({
       data: {
         name: user.name,
         about: user.about,
@@ -111,7 +112,7 @@ const login = (req, res, next) => {
         httpOnly: true,
       });
 
-      return res.send({ message: 'Всё верно!' });
+      return res.status(COMPLETED).send({ message: 'Всё верно!' });
     })
     .catch((err) => {
       next(err);
