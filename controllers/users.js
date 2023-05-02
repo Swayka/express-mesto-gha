@@ -88,7 +88,6 @@ const updateUserAvatar = (req, res) => {
 const login = (req, res, next) => {
   const { email, password } = req.body;
   let userId;
-
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {

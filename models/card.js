@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { isURL } = require('validator');
+const { LINK } = require('../utils/regex');
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -12,10 +12,8 @@ const cardSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator(link) {
-        return isURL(link);
-      },
-      message: 'Переданы некорректные данные',
+      validator: (v) => LINK.test(v),
+      message: 'Неправильный формат ссылки',
     },
   },
   owner: {

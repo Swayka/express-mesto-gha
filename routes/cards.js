@@ -3,9 +3,7 @@ const { cardValidation, cardIdValidation } = require('../middlewares/validate');
 
 const cardRouter = express.Router();
 
-const {
-  getCards, createCard, deleteCard, putLike, deleteLike,
-} = require('../controllers/cards');
+const { getCards, createCard, deleteCard, putLike, deleteLike } = require('../controllers/cards');
 
 cardRouter.get('/', getCards);
 cardRouter.post('/', cardValidation, createCard);
