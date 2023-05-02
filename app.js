@@ -1,22 +1,37 @@
 const express = require('express');
-const app = express();
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
+const { errors } = require('celebrate');
 const rootRouter = require('./routes/index');
+const { login, createUser } = require('./controllers/users');
+const { loginValidation, userValidation } = require('./middlewares/validate');
 
 const { PORT = 3000 } = process.env;
+const app = express();
 
 app.use(express.json());
+app.use(helmet());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '6442280780e747f5950e1457',
-  };
+app.post('/signin', loginValidation, login);
+app.post('/signup', userValidation, createUser);
+app.use('/', rootRouter);
 
+app.use(errors());
+
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+
+  res.status(statusCode).send({
+    message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
+  });
   next();
 });
-app.use('/', rootRouter);
+
 
 app.listen(PORT, () => {
   console.log("Server started on port " + PORT);
