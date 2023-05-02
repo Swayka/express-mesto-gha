@@ -34,19 +34,14 @@ const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  return bcrypt.hash(password, 10)
+  bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
     .then((user) => {
-      res.send({
-        data: {
-          name: user.name,
-          about: user.about,
-          avatar: user.avatar,
-          email: user.email,
-        },
-      });
+      const dataUser = user.toObject();
+      delete dataUser.password;
+      res.status(200).send(dataUser);
     })
     .catch((err) => {
       if (err.code === 11000) {
@@ -68,7 +63,9 @@ const userUpdate = (req, res, updateData, next) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        throw new BadRequestError('Переданы некорректные данные');
+        next(new BadRequestError('Переданы некорректные данные'));
+      } else if (err.code === 11000) {
+        next(new ConflictRequestError('Email уже зарегистрирован'));
       } else {
         next(err);
       }
