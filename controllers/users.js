@@ -6,6 +6,7 @@ const NotFoundError = require('../errors/NotFoundError');
 const ConflictRequestError = require('../errors/ConflictRequestError');
 const BadRequestError = require('../errors/BadRequestError');
 const AuthorizationError = require('../errors/AuthorizationError');
+const { JWT_SECRET, NODE_ENV } = process.env;
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -84,31 +85,17 @@ const updateUserAvatar = (req, res) => {
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
-  let userId;
-  User.findOne({ email }).select('+password')
+  return User.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user) {
-        throw new AuthorizationError('Неправильные почта или пароль.');
-      }
-      userId = user._id;
-      return bcrypt.compare(password, user.password);
-    })
-    .then((matched) => {
-      if (!matched) {
-        throw new AuthorizationError('Неправильные почта или пароль.');
-      }
-      const token = jwt.sign({ _id: userId }, 'some-secret-key', { expiresIn: '7d' });
-
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
       res.cookie('jwt', token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
+        sameSite: true,
       });
-
-      return res.status(200).send({ message: 'Все верно!' });
+      res.status(200).send({ message: 'Успешный вход' });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 };
 
 const getUser = (req, res, next) => {
