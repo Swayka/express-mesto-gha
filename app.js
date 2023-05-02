@@ -4,8 +4,6 @@ const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
 const rootRouter = require('./routes/index');
-const { login, createUser } = require('./controllers/users');
-const { loginValidation, userValidation } = require('./middlewares/validate');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -17,8 +15,6 @@ app.use(cookieParser());
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
-app.post('/signin', loginValidation, login);
-app.post('/signup', userValidation, createUser);
 app.use('/', rootRouter);
 
 app.use(errors());

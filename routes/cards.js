@@ -1,10 +1,18 @@
 const express = require('express');
-const { cardValidation, cardIdValidation } = require('../middlewares/validate');
 
 const cardRouter = express.Router();
 
 const {
-  getCards, createCard, deleteCard, putLike, deleteLike,
+  cardValidation,
+  cardIdValidation,
+} = require('../middlewares/validate');
+
+const {
+  getCards,
+  createCard,
+  deleteCard,
+  putLike,
+  deleteLike,
 } = require('../controllers/cards');
 
 cardRouter.get('/', getCards);
