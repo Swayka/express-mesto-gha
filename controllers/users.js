@@ -57,13 +57,20 @@ const createUser = (req, res, next) => {
     });
 };
 
-const userUpdate = (req, res, updateData) => {
+const userUpdate = (req, res, updateData, next) => {
   const userId = req.user._id;
   User.findByIdAndUpdate(userId, updateData, { new: true, runValidators: true })
-    .then((user) => res.send(user))
+    .then((user) => {
+      if (user) res.send({ data: user });
+      else {
+        throw new NotFoundError('Пользователь не найден');
+      }
+    })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
         throw new BadRequestError('Переданы некорректные данные');
+      } else {
+        next(err);
       }
     });
 };

@@ -46,21 +46,23 @@ const deleteCard = (req, res, next) => {
     });
 };
 
-const updateCard = (req, res, updateData) => {
+const updateCard = (req, res, updateData, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     updateData,
     { new: true },
   )
-    .populate(['owner', 'likes'])
     .then((card) => {
-      if (!card) {
+      if (card) res.send({ data: card });
+      else {
         throw new NotFoundError('Карточка не найдена');
-      } else res.send({ data: card });
+      }
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
         throw new BadRequestError('Переданы не корректные данные');
+      } else {
+        next(err);
       }
     });
 };
