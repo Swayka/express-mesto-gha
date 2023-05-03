@@ -54,7 +54,9 @@ const createUser = (req, res, next) => {
         next(new ConflictRequestError('Пользователь с таким email уже существует'));
       } else if (err instanceof mongoose.Error.ValidationError) {
         next(new BadRequestError('Переданы некорректные данные'));
-      } else next(err);
+      } else {
+        next(err);
+      }
     });
 };
 

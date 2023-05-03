@@ -50,7 +50,7 @@ const deleteCard = (req, res, next) => {
     });
 };
 
-const putLike = (req, res, updateData, next) => {
+const putLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.id,
     { $addToSet: { likes: req.user._id } },

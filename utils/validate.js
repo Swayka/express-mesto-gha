@@ -1,10 +1,11 @@
 const { celebrate, Joi } = require('celebrate');
-const { LINK } = require('../utils/regex');
+
+const RegExp = /http[s]?:\/\/(www\.)?[-a-zA-Z0-9:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9():%_+.~#?&//=]*)/;
 
 const loginValidation = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required(),
+    password: Joi.string().required().regex(RegExp),
   }),
 });
 
@@ -12,7 +13,7 @@ const userValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().regex(LINK),
+    avatar: Joi.string().regex(RegExp),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
@@ -20,33 +21,33 @@ const userValidation = celebrate({
 
 const idValidation = celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().alphanum().length(24).hex(),
+    userId: Joi.string().length(24).hex(),
   }),
 });
 
 const cardIdValidation = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().alphanum().length(24).hex(),
+    cardId: Joi.string().length(24).hex(),
   }),
 });
 
 const cardValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().regex(LINK),
+    link: Joi.string().required().regex(RegExp),
   }),
 });
 
 const aboutValidation = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30).required(),
-    about: Joi.string().min(2).max(30).required(),
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
   }),
 });
 
 const avatarValidation = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required().regex(LINK),
+    avatar: Joi.string().regex(RegExp),
   }),
 });
 

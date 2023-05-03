@@ -6,7 +6,7 @@ const {
   aboutValidation,
   avatarValidation,
   idValidation,
-} = require('../middlewares/validate');
+} = require('../utils/validate');
 
 const {
   getUsers,
