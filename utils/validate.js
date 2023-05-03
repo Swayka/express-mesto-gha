@@ -1,19 +1,18 @@
-const { celebrate, Joi } = require('celebrate');
-const isUrl = require('validator/lib/isURL');
-const UnauthorizedError = require('../errors/UnauthorizedError');
+const { celebrate, Joi, CelebrateError } = require('celebrate');
+const validator = require('validator');
 
-const validationUrl = (url) => {
-  const validate = isUrl(url);
-  if (validate) {
-    return url;
+const validate = (value) => {
+  const result = validator.isURL(value);
+  if (result) {
+    return value;
   }
-  throw new UnauthorizedError('Некорректный адрес URL');
+  throw new CelebrateError('Некорректный адрес');
 };
 
 const loginValidation = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required().custom(validationUrl),
+    password: Joi.string().required(),
   }),
 });
 
@@ -21,7 +20,7 @@ const userValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().custom(validationUrl),
+    avatar: Joi.string().custom(validate),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
@@ -29,33 +28,33 @@ const userValidation = celebrate({
 
 const idValidation = celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().length(24).hex(),
+    userId: Joi.string().alphanum().length(24).hex(),
   }),
 });
 
 const cardIdValidation = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().length(24).hex(),
+    cardId: Joi.string().alphanum().length(24).hex(),
   }),
 });
 
 const cardValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().custom(validationUrl),
+    link: Joi.string().required().custom(validate),
   }),
 });
 
 const aboutValidation = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
+    name: Joi.string().min(2).max(30).required(),
+    about: Joi.string().min(2).max(30).required(),
   }),
 });
 
 const avatarValidation = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().custom(validationUrl),
+    avatar: Joi.string().required().custom(validate),
   }),
 });
 
