@@ -1,11 +1,19 @@
 const { celebrate, Joi } = require('celebrate');
+const isUrl = require('validator/lib/isURL');
+const BadRequestError = require('../errors/BadRequestError');
 
-const { regex } = require('./constants');
+const validationUrl = (url) => {
+  const validate = isUrl(url);
+  if (validate) {
+    return url;
+  }
+  throw new BadRequestError('Некорректный адрес URL');
+};
 
 const loginValidation = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required().regex(regex),
+    password: Joi.string().required().custom(validationUrl),
   }),
 });
 
@@ -13,7 +21,7 @@ const userValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().regex(regex),
+    avatar: Joi.string().custom(validationUrl),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
@@ -34,7 +42,7 @@ const cardIdValidation = celebrate({
 const cardValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().regex(regex),
+    link: Joi.string().required().custom(validationUrl),
   }),
 });
 
@@ -47,7 +55,7 @@ const aboutValidation = celebrate({
 
 const avatarValidation = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().regex(regex),
+    avatar: Joi.string().custom(validationUrl),
   }),
 });
 

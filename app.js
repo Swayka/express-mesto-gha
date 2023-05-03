@@ -31,7 +31,6 @@ app.use('*', (req, res, next) => {
 app.use(errors());
 app.use(errorHandler);
 
-
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
