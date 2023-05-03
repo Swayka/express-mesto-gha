@@ -1,8 +1,9 @@
+const httpConstants = require('http2').constants;
+
 class ForbiddenError extends Error {
   constructor(message) {
     super(message);
-    this.name = 'ForbiddenError';
-    this.statusCode = 403;
+    this.statusCode = httpConstants.HTTP_STATUS_FORBIDDEN;
   }
 }
 
