@@ -26,10 +26,45 @@ app.use(errors());
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
 
-  res.status(statusCode).send({
-    message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
-  });
+  if (err.code === 11000) {
+    res.status(409).send({ message: 'Пользователь с таким email уже существует.' });
+    return;
+  }
+
+  if (err.name === 'ForbiddenError') {
+    res.status(err.statusCode).send({ message: err.message });
+  }
+
+  if (err.name === 'AuthenticationError') {
+    res.status(err.statusCode).send({ message: err.message });
+  }
+
+  if (err.name === 'NotFoundError') {
+    res.status(404).send({ message: err.message });
+  }
+
+  if (err.name === 'CastError') {
+    res.status(400).send({ message: 'Некорректный id.' });
+    return;
+  }
+
+  if (err.name === 'ValidationError') {
+    res.status(400).send({ message: 'Переданы некорректные данные.' });
+    return;
+  }
+
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
   next();
+});
+
+app.use('*', (req, res) => {
+  res.status(404).send({ message: 'Некорректный путь или запрос.' });
 });
 
 app.listen(PORT, () => {

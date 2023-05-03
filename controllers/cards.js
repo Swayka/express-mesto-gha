@@ -1,13 +1,10 @@
-const mongoose = require('mongoose');
 const Card = require('../models/card');
 const NotFoundError = require('../errors/NotFoundError');
-const BadRequestError = require('../errors/BadRequestError');
 const ForbiddenError = require('../errors/ForbiddenError');
 
 const getCards = (req, res, next) => {
   Card.find({})
-    .populate(['owner', 'likes'])
-    .then((cards) => res.send({ data: cards }))
+    .then((card) => res.send({ data: card }))
     .catch(next);
 };
 
@@ -18,36 +15,22 @@ const createCard = (req, res, next) => {
     .then((card) => {
       res.status(201).send({ data: card });
     })
-    .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        next(new BadRequestError('Переданы некорректные данные'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
+    .orFail(() => {
+      throw new NotFoundError('Такая карточка не найдена.');
+    })
     .then((card) => {
-      if (!card) {
-        throw new NotFoundError('Карточка не найдена');
-      } else if (card.owner.toString() !== req.user._id) {
-        throw new ForbiddenError('Доступ запрещен');
+      if (card.owner.toString() === req.user._id) {
+        Card.findByIdAndRemove(req.params.cardId).then(() => res.send(card));
       } else {
-        card.deleteOne()
-          .then(() => {
-            res.send({ message: 'Карточка удалена' });
-          });
+        throw new ForbiddenError('Нет доступа');
       }
     })
-    .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        next(new BadRequestError('Переданы не корректные данные'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 const putLike = (req, res, next) => {
@@ -56,19 +39,13 @@ const putLike = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => {
-      if (!card) {
-        throw new NotFoundError('Объект не найден');
-      }
-      return res.send({ data: card });
+    .orFail(() => {
+      throw new NotFoundError('Карточка не найдена.');
     })
-    .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        next(new BadRequestError('Переданы некорректные данные'));
-      } else {
-        next(err);
-      }
-    });
+    .then((card) => {
+      res.send(card);
+    })
+    .catch(next);
 };
 
 const deleteLike = (req, res, next) => {
@@ -77,19 +54,13 @@ const deleteLike = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => {
-      if (!card) {
-        throw new NotFoundError('Объект не найден');
-      }
-      return res.send({ data: card });
+    .orFail(() => {
+      throw new NotFoundError('Карточка не найдена.');
     })
-    .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        next(new BadRequestError('Переданы некорректные данные'));
-      } else {
-        next(err);
-      }
-    });
+    .then((card) => {
+      res.send(card);
+    })
+    .catch(next);
 };
 
 module.exports = {
