@@ -56,9 +56,8 @@ const putLike = (req, res, next) => {
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Такой карточки не существует');
-      } else {
-        res.send({ data: card });
       }
+      res.send({ data: card });
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
@@ -78,9 +77,8 @@ const deleteLike = (req, res, next) => {
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Такой карточки не существует');
-      } else {
-        res.send({ data: card });
       }
+      res.send({ data: card });
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {

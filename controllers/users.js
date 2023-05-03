@@ -22,11 +22,7 @@ const getUser = (req, res, next) => {
         res.send({ data: user });
       }
     })
-    .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        next(new BadRequestError('Переданы не корректные данные'));
-      } else next(err);
-    });
+    .catch(next);
 };
 
 const getUserById = (req, res, next) => {
