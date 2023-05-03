@@ -19,10 +19,14 @@ const getUser = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('Пользователь не найден');
       } else {
-        res.status(httpConstants.HTTP_STATUS_OK).send({ user });
+        res.send({ data: user });
       }
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Переданы не корректные данные'));
+      } else next(err);
+    });
 };
 
 const getUserById = (req, res, next) => {
@@ -55,11 +59,13 @@ const createUser = (req, res, next) => {
       name, about, avatar, email, password: hash,
     }))
     .then((user) => res.status(httpConstants.HTTP_STATUS_CREATED).send({
-      name: user.name,
-      about: user.about,
-      avatar: user.avatar,
-      _id: user._id,
-      email: user.email,
+      data: {
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        _id: user._id,
+        email: user.email,
+      },
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
