@@ -19,7 +19,7 @@ const getUser = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('Пользователь не найден');
       } else {
-        res.send({ user });
+        res.status(httpConstants.HTTP_STATUS_OK).send({ user });
       }
     })
     .catch(next);
@@ -117,11 +117,11 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user || !password) {
+      if (!user) {
         next(new UnauthorizedError('Неправильный логин или пароль.'));
       } else {
         const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
-        res.send({ token });
+        res.status(httpConstants.HTTP_STATUS_OK).send({ token });
       }
     })
     .catch(next);
